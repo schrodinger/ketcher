@@ -18,7 +18,7 @@ const cp = require('child_process');
 module.exports.version = function (options, cb) {
 	const pkg = options.pkg;
 	if (pkg.rev) return cb();
-	cp.exec('git rev-list ' + pkg.version + '..HEAD --count', function (err, stdout, stderr) {
+	cp.exec('git log --pretty=oneline ' + pkg.version + '..HEAD | wc -l', function (err, stdout, stderr) {
 		if (err && stderr.toString().search('path not in') > 0) {
 			cb(new Error('Could not fetch revision. ' +
 				'Please git tag the package version.'));
