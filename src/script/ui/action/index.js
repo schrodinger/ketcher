@@ -20,6 +20,7 @@ import tools from './tools';
 import atoms from './atoms';
 import zoom from './zoom';
 import server from './server';
+import rdkitjstools from './rdkitjstools';
 import debug from './debug';
 import templates from './templates';
 import { exec } from '../component/cliparea';
@@ -148,6 +149,7 @@ export default {
 		}
 	},
 	...server,
+	...rdkitjstools,
 	...debug,
 	...tools,
 	...atoms,
