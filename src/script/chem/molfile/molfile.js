@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************/
-
+import { Bond } from '../struct';
 import element from './../element';
 
 import common from './common';
 import utils from './utils';
+
+const pkg = require('../../../../package.json');
 
 function Molfile(v3000) {
 	/* reader */
@@ -135,10 +137,13 @@ Molfile.prototype.saveMolecule = function (molecule, skipSGroupErrors, norgroups
 
 	this.prepareSGroups(skipSGroupErrors, preserveIndigoDesc);
 
-	this.writeHeader();
-
-	// TODO: saving to V3000
-	this.writeCTab2000();
+	if (this.v3000) {
+		this.writeHeaderV3000();
+		this.writeCTab3000();
+	} else {
+		this.writeHeader();
+		this.writeCTab2000();
+	}
 
 	return this.molfile;
 };
@@ -155,6 +160,14 @@ Molfile.prototype.writeHeader = function () {
 	this.writeCR(((date.getMonth() + 1) + '').padStart(2) + (date.getDate() + '').padStart(2) + ((date.getFullYear() % 100) + '').padStart(2) +
 	(date.getHours() + '').padStart(2) + (date.getMinutes() + '').padStart(2) + '2D 1   1.00000     0.00000     0');
 	this.writeCR();
+};
+
+Molfile.prototype.writeHeaderV3000 = function () {
+	/* saver */
+	this.writeCR();
+	this.writeCR(`  Ketcher ${pkg.version}`);
+	this.writeCR();
+	this.writeCR('  0  0  0     0  0            999 V3000');
 };
 
 Molfile.prototype.write = function (str) {
@@ -213,6 +226,163 @@ Molfile.prototype.writeCTab2000Header = function () {
 	this.writeWhiteSpace(12);
 	this.writePaddedNumber(999, 3);
 	this.writeCR(' V2000');
+};
+
+
+Molfile.prototype.writeCTab3000 = function () { // eslint-disable-line max-statements
+	/* saver */
+	this.writeCR('M  V30 BEGIN CTAB');
+	const noOfAtoms = this.molecule.atoms.size;
+	const noOfBonds = this.molecule.bonds.size;
+	const noOfSGroups = this.molecule.sgroups.size;
+	const isChiral = this.molecule.isChiral ? 1 : 0;
+	// Counts Line
+	this.writeCR(`M  V30 COUNTS ${noOfAtoms} ${noOfBonds} ${noOfSGroups} 0 ${isChiral}`);
+	this.writeAtomBlock3000();
+	this.writeBondBlock3000();
+	this.writeCR('M  V30 END CTAB');
+	this.writeCR('M  END');
+};
+
+Molfile.prototype.writeAtomBlock3000 = function () {
+	if (this.molecule.atoms.size === 0) {
+		return;
+	}
+	this.writeCR('M  V30 BEGIN ATOM');
+	this.molecule.atoms.forEach((atom, id) => {
+		let atomDetails = this.getMol3000Prefix();
+		atomDetails += `${id + 1} `;
+		atomDetails += this.getAtomType(atom);
+		atomDetails += ' ';
+		// It would be uniform to keep a maximum of 4 decimal places,
+		// which should be accurate enough for positioning the molecule.
+		// It would also keep the representation neat enough.
+		// Technically we can have any number of decimal places
+		atomDetails += this.getAtomCoordinate3000(atom.pp.x, 4);
+		atomDetails += ' ';
+		atomDetails += this.getAtomCoordinate3000(-atom.pp.y, 4);
+		atomDetails += ' ';
+		atomDetails += this.getAtomCoordinate3000(atom.pp.z, 0);
+		atomDetails += ' ';
+		atomDetails += atom.aam;
+		if (atom.charge !== 0) {
+			atomDetails += ` CHG=${atom.charge}`;
+		}
+		if (atom.radical !== 0) {
+			atomDetails += ` RAD=${atom.radical}`;
+		}
+		if (atom.valence !== 0) {
+			atomDetails += ` VAL=${atom.valence}`;
+		}
+		if (atom.hCount !== 0) {
+			atomDetails += ` HCOUNT=${atom.hCount}`;
+		}
+		if (atom.invRet !== 0) {
+			atomDetails += ` INVRET=${atom.invRet}`;
+		}
+		if (atom.exactChangeFlag != 0) {
+			atomDetails += ` EXACHG=${atom.exactChangeFlag}`;
+		}
+		if (atom.substitutionCount !== 0) {
+			atomDetails += ` SUBST=${atom.substitutionCount}`;
+		}
+		if (atom.unsaturatedAtom !== 0) {
+			atomDetails += ` UNSAT=${atom.unsaturatedAtom}`;
+		}
+		if (atom.ringBondCount !== 0) {
+			atomDetails += ` RBCNT=${atom.ringBondCount}`;
+		}
+		if (atom.attpnt != null) {
+			atomDetails += ` ATTCHPT=${atom.attpnt}`;
+		}
+		if (atom.rglabel != null && atom.label === 'R#') {
+			atomDetails += ` RGROUPS=(1 ${atom.rglabel})`;
+		}
+		// TODO: Add support for following:
+		// 1. CFG - Stereo configuration
+		// 2. MASS - Atomic weight
+		// 3. STBOX - Stereo box
+		// 4. ATTCHORD - Attachment order
+
+		const atomDetailsLines = atomDetails.match(/.{1,70}/g);
+		this.writeCR(atomDetailsLines.join(' -\nM  V30 '));
+	});
+	this.writeCR('M  V30 END ATOM');
+};
+
+Molfile.prototype.writeBondBlock3000 = function () {
+	if (this.molecule.bonds.size === 0) {
+		return;
+	}
+	this.writeCR('M  V30 BEGIN BOND');
+	this.molecule.bonds.forEach((bond, id) => {
+		let bondDetails = this.getMol3000Prefix();
+		bondDetails += `${id + 1} `;
+		bondDetails += bond.type;
+		bondDetails += ' ';
+		bondDetails += bond.begin + 1;
+		bondDetails += ' ';
+		bondDetails += bond.end + 1;
+
+		if (bond.topology !== 0) {
+			bondDetails += ` TOPO=${bond.topology}`;
+		}
+		if (bond.reactingCenterStatus !== 0) {
+			bondDetails += ` RXCTR=${bond.reactingCenterStatus}`;
+		}
+		if (bond.stereo !== 0) {
+			bondDetails += ` CFG=${this.getV3000BondConfiguration(bond.stereo)}`;
+		}
+		// TODO: Add support for following:
+		// 1. STBOX - Stereo box
+		const bondDetailsLines = bondDetails.match(/.{1,70}/g);
+		this.writeCR(bondDetailsLines.join(' -\nM  V30 '));
+	});
+	this.writeCR('M  V30 END BOND');
+};
+
+Molfile.prototype.getMol3000Prefix = function () {
+	return 'M  V30 ';
+};
+
+Molfile.prototype.getV3000BondConfiguration = function (stereo) {
+	switch(stereo) {
+		case Bond.PATTERN.STEREO.UP:
+			return 1;
+		case Bond.PATTERN.STEREO.EITHER:
+			return 2;
+		case Bond.PATTERN.STEREO.DOWN:
+			return 3;
+		default:
+			return 0;
+	}
+};
+
+Molfile.prototype.getAtomCoordinate3000 = function (number, precision) {
+	number = parseFloat(number);
+	return number.toFixed(precision || 0).replace(',', '.');
+};
+
+/**
+ * Returns the atom type
+ *
+ * @param atom
+ * @returns {string}
+ */
+Molfile.prototype.getAtomType = function (atom) {
+	var label = atom.label;
+	if (atom.atomList != null) {
+		return 'L';
+	}
+	if (atom['pseudo']) {
+		if (atom['pseudo'].length > 3) {
+			return 'A';
+		}
+	}
+	if (!element.map[label] && ['A', 'Q', 'X', '*', 'R#'].indexOf(label) == -1) { // search in generics?
+		return 'C';
+	}
+	return label;
 };
 
 Molfile.prototype.writeCTab2000 = function (rgroups) { // eslint-disable-line max-statements
