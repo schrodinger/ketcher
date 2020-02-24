@@ -99,7 +99,7 @@ Molfile.prototype.saveMolecule = function (molecule, skipSGroupErrors, norgroups
 			this.writeV2000Reaction(molecule, reactants, products);
 	}
 
-	if (molecule.rgroups.size > 0) {
+	if (!this.v3000 && molecule.rgroups.size > 0) {
 		if (norgroups) {
 			molecule = molecule.getScaffold();
 		} else {
@@ -129,7 +129,8 @@ Molfile.prototype.saveMolecule = function (molecule, skipSGroupErrors, norgroups
 
 	if (this.v3000) {
 		this.writeHeaderV3000();
-		this.writeCTab3000(this.molecule);
+		this.writeCTab3000(this.molecule.getScaffold());
+		this.writeRGroups3000(this.molecule);
 		this.writeCR('M  END');
 	} else {
 		this.writeHeader();
@@ -287,6 +288,27 @@ Molfile.prototype.writeCTab3000 = function (molecule) { // eslint-disable-line m
 	this.writeAtomBlock3000(molecule);
 	this.writeBondBlock3000(molecule);
 	this.writeCR('M  V30 END CTAB');
+};
+
+Molfile.prototype.writeRGroups3000 = function (molecule) { // eslint-disable-line max-statements
+	/* saver */
+	if (molecule.rgroups.size === 0) {
+		return;
+	}
+	molecule.rgroups.forEach((rgroup, id) => {
+		this.writeRGroup3000(molecule, rgroup, id);
+	});
+};
+
+Molfile.prototype.writeRGroup3000 = function (molecule, rgroup, id) { // eslint-disable-line max-statements
+	/* saver */
+
+	this.writeCR(`M  V30 BEGIN RGROUP ${id}`);
+	this.writeCR(`M  V30 RLOGIC ${rgroup.ifthen} ${rgroup.resth ? 1 : 0} ${rgroup.range}`);
+	rgroup.frags.forEach((fid) => {
+		this.writeCTab3000(molecule.getFragment(fid));
+	});
+	this.writeCR('M  V30 END RGROUP');
 };
 
 Molfile.prototype.writeAtomBlock3000 = function (molecule) {
