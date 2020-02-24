@@ -302,7 +302,6 @@ Molfile.prototype.writeRGroups3000 = function (molecule) { // eslint-disable-lin
 
 Molfile.prototype.writeRGroup3000 = function (molecule, rgroup, id) { // eslint-disable-line max-statements
 	/* saver */
-
 	this.writeCR(`M  V30 BEGIN RGROUP ${id}`);
 	this.writeCR(`M  V30 RLOGIC ${rgroup.ifthen} ${rgroup.resth ? 1 : 0} ${rgroup.range}`);
 	rgroup.frags.forEach((fid) => {
