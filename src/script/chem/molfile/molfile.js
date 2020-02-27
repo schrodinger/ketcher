@@ -325,6 +325,9 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 		// 6. XBCORR
 		// 7. ESTATE
 		// 8. CSTATE
+		// 9. CLASS
+		// 10. SAP
+		// 11. BRKTYP
 		if (sgroup.type === 'DAT') {
 			if (sgroup.data.fieldName.length > 0) {
 				sgDetails += ` FIELDNAME=${sgroup.data.fieldName}`;
