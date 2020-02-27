@@ -344,10 +344,24 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 				sgDetails += ` FIELDINFO=${sgroup.data.units}`;
 			}
 			if (sgroup.pp) {
-				// NOTE: please refer to the fixed length string in parseSGroup#applyDataSGroupInfo
-				// for writing FIELDDISP, OR refer to page 22 of the spec
-				// https://drive.google.com/file/d/0Bx3dsPc7eyZKdXlHTktQTFJUMHc/view, under 'M  SDD ..'
-				// FIELDDISP is the Data Sgroup field display information
+				// NOTE: please refer to https://drive.google.com/file/d/0Bx3dsPc7eyZKdXlHTktQTFJUMHc/view
+				//
+				// *Data Sgroup Display Information [Sgroup]*
+				// M SDD sss xxxxx.xxxxyyyyy.yyyy eeefgh i jjjkkk ll m noo
+				//
+				// sss: Index of data Sgroup
+				// x,y: Coordinates (2F10.4)
+				// eee: (Reserved for future use)
+				// f: Data display, A = attached, D = detached
+				// g: Absolute, relative placement, A = absolute, R = relative
+				// h: Display units, blank = no units displayed, U = display units
+				// i: (Reserved for future use)
+				// jjj: Number of characters to display (1...999 or ALL)
+				// kkk: Number of lines to display (unused, always 1)
+				// ll: (Reserved for future use)
+				// m: Tag character for tagged detached display (if non-blank)
+				// n: Data display DASP position (1...9). (MACCS-II only)
+				// oo: (Reserved for future use)
 				const x = this.getAtomCoordinate3000(sgroup.pp.x, 4).toString().padStart(10, ' ');
 				const y = this.getAtomCoordinate3000(-sgroup.pp.y, 4).toString().padStart(10, ' ');
 				const eee = '   ';
@@ -376,7 +390,6 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 				sgDetails += ` FIELDDATA=${sgroup.data.fieldValue}`;
 			}
 		}
-		// CON
 		sgDetails += ` CONNECT=${sgroup.data.connectivity.toUpperCase()}`;
 		var parentId = this.molecule.sGroupForest.parent.get(id) + 1;
 		if (parentId > 0) {
