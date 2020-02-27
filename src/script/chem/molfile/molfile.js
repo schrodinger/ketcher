@@ -286,7 +286,102 @@ Molfile.prototype.writeCTab3000 = function (molecule) { // eslint-disable-line m
 	this.writeCR(`M  V30 COUNTS ${noOfAtoms} ${noOfBonds} ${noOfSGroups} 0 ${isChiral}`);
 	this.writeAtomBlock3000(molecule);
 	this.writeBondBlock3000(molecule);
+	this.writeSGroupBlock3000(molecule);
 	this.writeCR('M  V30 END CTAB');
+};
+
+Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
+	if (molecule.sgroups.size === 0) {
+		return;
+	}
+	this.writeCR('M  V30 BEGIN SGROUP');
+	var sgmap = {};
+	var cnt = 1;
+	var sgmapback = {};
+	var sgorder = molecule.sGroupForest.getSGroupsBFS();
+	sgorder.forEach((id) => {
+		sgmapback[cnt] = id;
+		sgmap[id] = cnt++;
+	});
+	for (var q = 1; q < cnt; ++q) { // each group on its own
+		var id = sgmapback[q];
+		var sgroup = molecule.sgroups.get(id);
+		let sgDetails = `${this.getMol3000Prefix()}${id + 1} ${sgroup.type} 0`;
+		if (sgroup.atoms.length) {
+			sgDetails += ` ATOMS=(${sgroup.atoms.length} ${sgroup.atoms.map(atom => atom + 1).join(' ')})`;
+		}
+		if (sgroup.bonds && sgroup.bonds.length) {
+			sgDetails += ` XBONDS=(${sgroup.bonds.length} ${sgroup.bonds.map(bond => bond + 1).join(' ')})`;
+		}
+		if (sgroup.patoms) {
+			sgDetails += ` PATOMS=(${sgroup.patoms.length} ${sgroup.patoms.map(patom => patom + 1).join(' ')})`;
+		}
+		// TODO: Add support for following:
+		// 1. CBONDS
+		// 2. SUBTYPE
+		// 3. MULT
+		// 4. COMPNO
+		// 5. XBHEAD
+		// 6. XBCORR
+		// 7. ESTATE
+		// 8. CSTATE
+		if (sgroup.type === 'DAT') {
+			if (sgroup.data.fieldName.length > 0) {
+				sgDetails += ` FIELDNAME=${sgroup.data.fieldName}`;
+			}
+			// TODO: confirm whether FIELDINFO is just units.
+			if (sgroup.data.units && sgroup.data.units.length > 0) {
+				sgDetails += ` FIELDINFO=${sgroup.data.units}`;
+			}
+			if (sgroup.pp) {
+				// NOTE: please refer to the fixed length string in parseSGroup#applyDataSGroupInfo
+				// for writing FIELDDISP, OR refer to page 22 of the spec
+				// https://drive.google.com/file/d/0Bx3dsPc7eyZKdXlHTktQTFJUMHc/view, under 'M  SDD ..'
+				const x = this.getAtomCoordinate3000(sgroup.pp.x, 4).toString().padStart(10, ' ');
+				const y = this.getAtomCoordinate3000(-sgroup.pp.y, 4).toString().padStart(10, ' ');
+				const eee = '   ';
+				const f = sgroup.data.attached ? 'A' : 'D';
+				const g = sgroup.data.absolute ? 'A' : 'R';
+				const h = sgroup.data.showUnits ? 'U' : ' ';
+				const i = ' ';
+				const jjj = sgroup.data.nCharsToDisplay === -1 ? 'ALL' : sgroup.data.nCharsToDisplay.padStart(3, 0);
+				const kkk = '001';
+				const ll = ' ';
+				const m = sgroup.data.tagChar;
+				const n = sgroup.data.daspPos;
+				const oo = '  ';
+				sgDetails += ` FIELDDISP="${x}${y} ${eee}${f}${g}${h} ${i} ${jjj}${kkk} ${ll} ${m}  ${n}${oo}"`;
+			}
+			if (sgroup.data.query.length > 0) {
+				sgDetails += ` QUERYTYPE=${sgroup.data.query}`;
+			}
+			if (sgroup.data.queryOp.length > 0) {
+				sgDetails += ` QUERYOP=${sgroup.data.queryOp}`;
+			}
+			if (sgroup.data.fieldValue.length > 0) {
+				sgDetails += ` FIELDDATA=${sgroup.data.fieldValue}`;
+			}
+		}
+		sgDetails += ` CONNECT=${sgroup.data.connectivity.toUpperCase()}`;
+		var parentId = this.molecule.sGroupForest.parent.get(id) + 1;
+		if (parentId > 0) {
+			sgDetails += ` PARENT=${parentId}`;
+		}
+		const brackedCoords = sgroup.bracketBox;
+		if (brackedCoords) {
+			const bracket1X = this.getAtomCoordinate3000(brackedCoords.p0.x, 4);
+			const bracket1Y = this.getAtomCoordinate3000(brackedCoords.p0.y, 4);
+			const bracket1Z = 0;
+			const bracket2X = this.getAtomCoordinate3000(brackedCoords.p1.x, 4);
+			const bracket2Y = this.getAtomCoordinate3000(brackedCoords.p1.y, 4);
+			const bracket2Z = 0;
+			sgDetails += ` BRKXYZ=(9 ${bracket1X} ${bracket1Y} ${bracket1Z} ${bracket2X} ${bracket2Y} ${bracket2Z} 0 0 0)`;
+		}
+		sgDetails += ` LABEL=${sgroup.data.subscript}`;
+		const sgDetailsLines = sgDetails.match(/.{1,70}/g);
+		this.writeCR(sgDetailsLines.join('-\nM  V30 '));
+	}
+	this.writeCR('M  V30 END SGROUP');
 };
 
 Molfile.prototype.writeAtomBlock3000 = function (molecule) {
@@ -350,7 +445,7 @@ Molfile.prototype.writeAtomBlock3000 = function (molecule) {
 		// 4. ATTCHORD - Attachment order
 
 		const atomDetailsLines = atomDetails.match(/.{1,70}/g);
-		this.writeCR(atomDetailsLines.join(' -\nM  V30 '));
+		this.writeCR(atomDetailsLines.join('-\nM  V30 '));
 	});
 	this.writeCR('M  V30 END ATOM');
 };
@@ -381,7 +476,7 @@ Molfile.prototype.writeBondBlock3000 = function (molecule) {
 		// TODO: Add support for following:
 		// 1. STBOX - Stereo box
 		const bondDetailsLines = bondDetails.match(/.{1,70}/g);
-		this.writeCR(bondDetailsLines.join(' -\nM  V30 '));
+		this.writeCR(bondDetailsLines.join('-\nM  V30 '));
 	});
 	this.writeCR('M  V30 END BOND');
 };
