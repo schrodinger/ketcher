@@ -37,8 +37,8 @@ function SGroup(type) { // eslint-disable-line max-statements
 	this.selectionPlate = null;
 
 	this.atoms = [];
-	this.patoms = [];
-	this.bonds = [];
+	this.patoms = []; // paradigmatic repeating unit atoms
+	this.bonds = []; // for some reason this corresponds to xbonds as mentioned in the spec https://drive.google.com/file/d/0Bx3dsPc7eyZKdXlHTktQTFJUMHc/view
 	this.xBonds = [];
 	this.neiAtoms = [];
 	this.pp = null;
@@ -46,13 +46,13 @@ function SGroup(type) { // eslint-disable-line max-statements
 		mul: 1, // multiplication count for MUL group
 		connectivity: 'ht', // head-to-head, head-to-tail or either-unknown
 		name: '',
-		subscript: 'n',
+		subscript: 'n', // we use this as the display label for the s-group
 
 		// data s-group fields
 		attached: false,
 		absolute: true,
 		showUnits: false,
-		nCharsToDisplay: -1,
+		nCharsToDisplay: -1, // -1 corresponds to "ALL"
 		tagChar: '',
 		daspPos: 1,
 		fieldType: 'F',
