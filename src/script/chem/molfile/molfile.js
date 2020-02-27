@@ -308,12 +308,18 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 		var sgroup = molecule.sgroups.get(id);
 		let sgDetails = `${this.getMol3000Prefix()}${id + 1} ${sgroup.type} 0`;
 		if (sgroup.atoms.length) {
+			// atoms that define the Sgroup
+			// ATOMS=(natoms aidx1 aidx2 ..)
 			sgDetails += ` ATOMS=(${sgroup.atoms.length} ${sgroup.atoms.map(atom => atom + 1).join(' ')})`;
 		}
 		if (sgroup.bonds && sgroup.bonds.length) {
+			// crossing bonds
+			// XBONDS=(nxbonds bidx1 bidx2 ..)
 			sgDetails += ` XBONDS=(${sgroup.bonds.length} ${sgroup.bonds.map(bond => bond + 1).join(' ')})`;
 		}
 		if (sgroup.patoms) {
+			// paradigmatic repeating unit atoms
+			// PATOMS=(npatoms aidx1 aidx2 ..)
 			sgDetails += ` PATOMS=(${sgroup.patoms.length} ${sgroup.patoms.map(patom => patom + 1).join(' ')})`;
 		}
 		// TODO: Add support for following:
@@ -330,6 +336,7 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 		// 11. BRKTYP
 		if (sgroup.type === 'DAT') {
 			if (sgroup.data.fieldName.length > 0) {
+				// the name of data field for Data Sgroup.
 				sgDetails += ` FIELDNAME=${sgroup.data.fieldName}`;
 			}
 			// TODO: confirm whether FIELDINFO is just units.
@@ -340,6 +347,7 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 				// NOTE: please refer to the fixed length string in parseSGroup#applyDataSGroupInfo
 				// for writing FIELDDISP, OR refer to page 22 of the spec
 				// https://drive.google.com/file/d/0Bx3dsPc7eyZKdXlHTktQTFJUMHc/view, under 'M  SDD ..'
+				// FIELDDISP is the Data Sgroup field display information
 				const x = this.getAtomCoordinate3000(sgroup.pp.x, 4).toString().padStart(10, ' ');
 				const y = this.getAtomCoordinate3000(-sgroup.pp.y, 4).toString().padStart(10, ' ');
 				const eee = '   ';
@@ -356,22 +364,28 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 				sgDetails += ` FIELDDISP="${x}${y} ${eee}${f}${g}${h} ${i} ${jjj}${kkk} ${ll} ${m}  ${n}${oo}"`;
 			}
 			if (sgroup.data.query.length > 0) {
+				// querytype is the type of query or no query if missing.
 				sgDetails += ` QUERYTYPE=${sgroup.data.query}`;
 			}
 			if (sgroup.data.queryOp.length > 0) {
+				// queryop is the query operator
 				sgDetails += ` QUERYOP=${sgroup.data.queryOp}`;
 			}
 			if (sgroup.data.fieldValue.length > 0) {
+				// fielddata is the query or field data.
 				sgDetails += ` FIELDDATA=${sgroup.data.fieldValue}`;
 			}
 		}
+		// CON
 		sgDetails += ` CONNECT=${sgroup.data.connectivity.toUpperCase()}`;
 		var parentId = this.molecule.sGroupForest.parent.get(id) + 1;
 		if (parentId > 0) {
+			// parent Sgroup index.
 			sgDetails += ` PARENT=${parentId}`;
 		}
 		const brackedCoords = sgroup.bracketBox;
 		if (brackedCoords) {
+			// display coordinates in each bracket.
 			const bracket1X = this.getAtomCoordinate3000(brackedCoords.p0.x, 4);
 			const bracket1Y = this.getAtomCoordinate3000(brackedCoords.p0.y, 4);
 			const bracket1Z = 0;
@@ -380,6 +394,7 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 			const bracket2Z = 0;
 			sgDetails += ` BRKXYZ=(9 ${bracket1X} ${bracket1Y} ${bracket1Z} ${bracket2X} ${bracket2Y} ${bracket2Z} 0 0 0)`;
 		}
+		// display label for this Sgroup.
 		sgDetails += ` LABEL=${sgroup.data.subscript}`;
 		const sgDetailsLines = sgDetails.match(/.{1,70}/g);
 		this.writeCR(sgDetailsLines.join('-\nM  V30 '));
