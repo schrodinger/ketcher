@@ -3,7 +3,7 @@
   "version": "2.0.0-RC",
   "description": "Web-based molecule sketcher",
   "license": "Apache-2.0",
-  "main": "ketcher.js",
+  "main": "dist/ketcher.js",
   "homepage": "http://lifescience.opensource.epam.com/ketcher",
   "author": {
     "name": "EPAM Life Sciences",
@@ -85,8 +85,7 @@
     "generate-svg": "gulp test-render && node test/utils/generate-svg.js",
     "style": "gulp style",
     "gulp": "gulp",
-    "postinstall": "guppy pre-commit || exit 0",
-    "prepare": "npm run build"
+    "postinstall": "guppy pre-commit || exit 0"
   },
   "dependencies": {
     "babel-polyfill": "6.23.0",
