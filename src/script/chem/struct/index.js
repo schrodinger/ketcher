@@ -196,6 +196,8 @@ Struct.prototype.mergeInto = function (cp, atomSet, bondSet, dropRxnSymbols, kee
 			cp.sGroupForest.insert(sg.id);
 	});
 
+	cp.enhancedStereo = this.enhancedStereo.clone();
+
 	cp.isChiral = cp.isChiral || this.isChiral;
 
 	if (!dropRxnSymbols) {

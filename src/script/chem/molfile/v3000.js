@@ -123,10 +123,10 @@ function v3000parseCollection(ctab, ctabLines, shift) {
 			ctab.enhancedStereo.abs = parseBracedNumberList(prop['ATOMS'], -1);
 		} else if (line.includes("STERAC")) {
 			const n = line.substring(line.indexOf('STERAC') + 6, line.indexOf('ATOMS')).trim();
-			ctab.enhancedStereo.rac[parseInt(n, 10)] = parseBracedNumberList(prop['ATOMS'], -1);
+			ctab.enhancedStereo.rac.set(parseInt(n, 10), parseBracedNumberList(prop['ATOMS'], -1));
 		} else if (line.includes("STEREL")) {
 			const n = line.substring(line.indexOf('STEREL') + 6, line.indexOf('ATOMS')).trim();
-			ctab.enhancedStereo.rel[parseInt(n, 10)] = parseBracedNumberList(prop['ATOMS'], -1);
+			ctab.enhancedStereo.rel.set(parseInt(n, 10), parseBracedNumberList(prop['ATOMS'], -1));
 		}
 		shift++;
 	}
