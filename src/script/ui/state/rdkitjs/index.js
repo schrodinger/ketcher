@@ -63,8 +63,8 @@ export function calculateCip(result) {
 		deleteAllSGroupsWithName(restruct, action, attributes.fieldName);
 		result.CIP_atoms.forEach((a) => {
 			const [index, fieldValue] = a;
-			const atomIdx = keys[index];
-			const atom = restruct.molecule.atoms.get(atomIdx);
+			const atomKey = keys[index];
+			const atom = restruct.molecule.atoms.get(atomKey);
 			attributes.fieldValue = fieldValue;
 			action.mergeWith(fromSgroupAddition(restruct, 'DAT', [atomIdx], attributes, undefined, atom.pp));
 		});
