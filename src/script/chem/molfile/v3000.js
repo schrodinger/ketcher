@@ -119,14 +119,14 @@ function v3000parseCollection(ctab, ctabLines, shift) {
 			throw new Error('A record of form AAA=BBB or AAA=(...) expected, got \'' + split[i] + '\'');
 		const name = subsplit[0];
 		const prop = { [name]: subsplit[1] };
-		if (line.includes("STEABS")) {
+		if (line.includes('STEABS')) {
 			ctab.enhancedStereo.abs = parseBracedNumberList(prop['ATOMS'], -1);
-		} else if (line.includes("STERAC")) {
+		} else if (line.includes('STERAC')) {
 			const n = line.substring(line.indexOf('STERAC') + 6, line.indexOf('ATOMS')).trim();
-			ctab.enhancedStereo.rac[parseInt(n, 10)] = parseBracedNumberList(prop['ATOMS'], -1);
-		} else if (line.includes("STEREL")) {
+			ctab.enhancedStereo.rac.set(parseInt(n, 10), parseBracedNumberList(prop['ATOMS'], -1));
+		} else if (line.includes('STEREL')) {
 			const n = line.substring(line.indexOf('STEREL') + 6, line.indexOf('ATOMS')).trim();
-			ctab.enhancedStereo.rel[parseInt(n, 10)] = parseBracedNumberList(prop['ATOMS'], -1);
+			ctab.enhancedStereo.rel.set(parseInt(n, 10), parseBracedNumberList(prop['ATOMS'], -1));
 		}
 		shift++;
 	}
