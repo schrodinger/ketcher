@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<title>Ketcher v2.0.0-RC+r2</title>
+		<title>Ketcher v2.0.0-RC+r5</title>
 
 		<link rel="shortcut icon" type="image/x-icon" href="logo/favicon.ico">
 		<link rel="icon" type="image/png" sizes="32x32" href="logo/favicon-32x32.png">
@@ -11,9 +11,23 @@
 		<link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png">
 
     <link rel="stylesheet" href="ketcher.css">
+    <script>
+			var Module = {
+				onRuntimeInitialized: function () {
+					// RDKitJS WebAssembly has successfully completed compilation.
+					// We can enable the RDKit JS-powered tools at this point.
+					var rdKitJsTools = document.getElementsByClassName('rdkitjs');
+					Array.from(rdKitJsTools).forEach((tool) => {
+					  tool.removeAttribute('disabled');
+					});
+				}
+			};
+		</script>
 		<script src="raphael.min.js"></script>
 		<script src="ketcher.js"></script>
+		<script src="https://rdkit.org/rdkitjs/beta/RDKit_minimal.js"></script>
 		<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+
 
 	</head>
 	<body role="applicaion">
