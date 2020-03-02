@@ -46,7 +46,7 @@ const App = connect(
 });
 
 function init(el, options, server) {
-	var store = createStore(options, server);
+	const store = createStore(options, server);
 	store.dispatch(initKeydownListener(el));
 	store.dispatch(initResize());
 
