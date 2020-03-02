@@ -17,9 +17,9 @@
 import Pool from '../../util/pool';
 
 function EnhancedStereo(molecule) {
-	this.abs = [];
-	this.rac = new Pool(); // n -> list of atom ids
-	this.rel = new Pool(); // n -> list of atom ids
+	this.abs = []; // absolute stereo info
+	this.rac = new Pool(); // n -> list of atom ids // racemic stereo info
+	this.rel = new Pool(); // n -> list of atom ids // relative stereo info
 	this.molecule = molecule;
 }
 export default EnhancedStereo;
