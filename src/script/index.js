@@ -109,6 +109,11 @@ function showMolfile(clientArea, molString, options) {
 	return render;
 }
 
+
+function setToolbarType(toolbarType) {
+	ketcher.ui.changeToolbarType(toolbarType);
+}
+
 // TODO: replace window.onload with something like <https://github.com/ded/domready>
 // to start early
 window.onload = function () {
@@ -145,6 +150,7 @@ const ketcher = module.exports = Object.assign({ // eslint-disable-line no-multi
 	getMolfile,
 	getRepresentationInFormat,
 	setMolecule,
+	setToolbarType,
 	addFragment,
 	showMolfile
 }, buildInfo);

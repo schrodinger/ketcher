@@ -25,7 +25,7 @@ import Toolbar from './toolbar';
 import createStore, { onAction, load } from '../state';
 import { checkServer } from '../state/server';
 import { initKeydownListener } from '../state/hotkeys';
-import { initResize } from '../state/toolbar';
+import { initResize, updateToolbarType } from '../state/toolbar';
 
 const App = connect(
 	null,
@@ -46,7 +46,7 @@ const App = connect(
 });
 
 function init(el, options, server) {
-	const store = createStore(options, server);
+	var store = createStore(options, server);
 	store.dispatch(initKeydownListener(el));
 	store.dispatch(initResize());
 
@@ -57,7 +57,8 @@ function init(el, options, server) {
 	), el);
 
 	return {
-		load: (structStr, opts) => store.dispatch(load(structStr, opts))
+		load: (structStr, opts) => store.dispatch(load(structStr, opts)),
+		changeToolbarType: toolbarType => store.dispatch(updateToolbarType(toolbarType))
 	};
 }
 

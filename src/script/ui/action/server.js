@@ -23,7 +23,7 @@ export default {
 		action: {
 			thunk: serverTransform('layout')
 		},
-		disabled: (editor, server, options) => !options.app.server
+		disabled: (editor, server, options) => !options.app.server,
 	},
 	clean: {
 		shortcut: 'Mod+Shift+l',
