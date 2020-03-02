@@ -1,13 +1,8 @@
 // Stoes the map of toolbar type enum --> <List of tool icons to hide>
-// Note that
+// Note that by default, all icons will be showed
 
 const toolbarTypeMap = {
-	ABC: [
-		'Layout',
-		'Clean Up',
-		'Aromatize',
-		'Chain'
-	],
+	ABC: [],
 	DEF: [
 		'Clean Up',
 		'Chain'
