@@ -69,4 +69,6 @@ module.exports.testIO = function () {
 			}))
 			.pipe(gulp.dest(`./test/dist/io${item}`));
 	});
+	gulp.src('./package.json')
+		.pipe(gulp.dest('./test/'));
 };

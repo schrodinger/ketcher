@@ -37,9 +37,13 @@ function saveSmiles() {
 		.catch(() => smiles.stringify(struct));
 }
 
-function getMolfile() {
+/**
+ * @param {boolean} v3000 - whether to retrieve the molecule in v3000 format. Default is v2000
+ * @returns {string}
+ */
+function getMolfile(v3000) {
 	return molfile.stringify(ketcher.editor.struct(),
-		{ ignoreErrors: true });
+		{ ignoreErrors: true, v3000 });
 }
 
 /**
