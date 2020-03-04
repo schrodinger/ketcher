@@ -95,18 +95,8 @@ Molfile.prototype.saveMolecule = function (molecule, skipSGroupErrors, norgroups
 
 		var reactants = components.reactants;
 		var products = components.products;
-		var all = reactants.concat(products);
-		this.molfile = '$RXN\n' + molecule.name + '\n\n\n' +
-			utils.paddedNum(reactants.length, 3) +
-			utils.paddedNum(products.length, 3) +
-			utils.paddedNum(0, 3) + '\n';
-		for (var i = 0; i < all.length; ++i) {
-			var saver = new Molfile(false);
-			var submol = molecule.clone(all[i], null, true);
-			var molfile = saver.saveMolecule(submol, false, true);
-			this.molfile += '$MOL\n' + molfile;
-		}
-		return this.molfile;
+		return this.v3000 ? this.writeV3000Reaction(molecule, reactants, products) :
+			this.writeV2000Reaction(molecule, reactants, products);
 	}
 
 	if (molecule.rgroups.size > 0) {
@@ -139,12 +129,67 @@ Molfile.prototype.saveMolecule = function (molecule, skipSGroupErrors, norgroups
 
 	if (this.v3000) {
 		this.writeHeaderV3000();
-		this.writeCTab3000();
+		this.writeCTab3000(this.molecule);
+		this.writeCR('M  END');
 	} else {
 		this.writeHeader();
 		this.writeCTab2000();
 	}
+	return this.molfile;
+};
 
+/**
+ * Writes the given reaction to V2000 format.
+ *
+ * @param molecule {Struct}
+ * @param reactants {!Array<Pile<number>>}
+ * @param products {!Array<Pile<number>>}
+ * @returns {string}
+ */
+Molfile.prototype.writeV2000Reaction = function (molecule, reactants, products) {
+	var all = reactants.concat(products);
+	this.molfile = '$RXN\n' + molecule.name + '\n\n\n' +
+		utils.paddedNum(reactants.length, 3) +
+		utils.paddedNum(products.length, 3) +
+		utils.paddedNum(0, 3) + '\n';
+	for (var i = 0; i < all.length; ++i) {
+		var saver = new Molfile(false);
+		var submol = molecule.clone(all[i], null, true);
+		var molfile = saver.saveMolecule(submol, false, true);
+		this.molfile += '$MOL\n' + molfile;
+	}
+	return this.molfile;
+};
+
+/**
+ * Writes the given reaction to V3000 format.
+ *
+ * @param molecule {Struct}
+ * @param reactants {!Array<Pile<number>>}
+ * @param products {!Array<Pile<number>>}
+ * @returns {string}
+ */
+Molfile.prototype.writeV3000Reaction = function (molecule, reactants, products) {
+	this.writeCR('$RXN V3000');
+	this.writeCR();
+	this.writeCR('      Ketcher');
+	this.writeCR();
+	this.writeCR(`M  V30 COUNTS ${reactants.length} ${products.length}`);
+	if (reactants.length) {
+		this.writeCR('M  V30 BEGIN REACTANT');
+		reactants.forEach((reactant) => {
+			this.writeCTab3000(molecule.clone(reactant, null, true));
+		});
+		this.writeCR('M  V30 END REACTANT');
+	}
+	if (products.length) {
+		this.writeCR('M  V30 BEGIN PRODUCT');
+		products.forEach((product) => {
+			this.writeCTab3000(molecule.clone(product, null, true));
+		});
+		this.writeCR('M  V30 END PRODUCT');
+	}
+	this.write('M  END');
 	return this.molfile;
 };
 
@@ -228,28 +273,26 @@ Molfile.prototype.writeCTab2000Header = function () {
 	this.writeCR(' V2000');
 };
 
-
-Molfile.prototype.writeCTab3000 = function () { // eslint-disable-line max-statements
+Molfile.prototype.writeCTab3000 = function (molecule) { // eslint-disable-line max-statements
 	/* saver */
 	this.writeCR('M  V30 BEGIN CTAB');
-	const noOfAtoms = this.molecule.atoms.size;
-	const noOfBonds = this.molecule.bonds.size;
-	const noOfSGroups = this.molecule.sgroups.size;
-	const isChiral = this.molecule.isChiral ? 1 : 0;
+	const noOfAtoms = molecule.atoms.size;
+	const noOfBonds = molecule.bonds.size;
+	const noOfSGroups = molecule.sgroups.size;
+	const isChiral = molecule.isChiral ? 1 : 0;
 	// Counts Line
 	this.writeCR(`M  V30 COUNTS ${noOfAtoms} ${noOfBonds} ${noOfSGroups} 0 ${isChiral}`);
-	this.writeAtomBlock3000();
-	this.writeBondBlock3000();
+	this.writeAtomBlock3000(molecule);
+	this.writeBondBlock3000(molecule);
 	this.writeCR('M  V30 END CTAB');
-	this.writeCR('M  END');
 };
 
-Molfile.prototype.writeAtomBlock3000 = function () {
-	if (this.molecule.atoms.size === 0) {
+Molfile.prototype.writeAtomBlock3000 = function (molecule) {
+	if (molecule.atoms.size === 0) {
 		return;
 	}
 	this.writeCR('M  V30 BEGIN ATOM');
-	this.molecule.atoms.forEach((atom, id) => {
+	molecule.atoms.forEach((atom, id) => {
 		let atomDetails = this.getMol3000Prefix();
 		atomDetails += `${id + 1} `;
 		atomDetails += this.getAtomType(atom);
@@ -310,12 +353,12 @@ Molfile.prototype.writeAtomBlock3000 = function () {
 	this.writeCR('M  V30 END ATOM');
 };
 
-Molfile.prototype.writeBondBlock3000 = function () {
-	if (this.molecule.bonds.size === 0) {
+Molfile.prototype.writeBondBlock3000 = function (molecule) {
+	if (molecule.bonds.size === 0) {
 		return;
 	}
 	this.writeCR('M  V30 BEGIN BOND');
-	this.molecule.bonds.forEach((bond, id) => {
+	molecule.bonds.forEach((bond, id) => {
 		let bondDetails = this.getMol3000Prefix();
 		bondDetails += `${id + 1} `;
 		bondDetails += bond.type;
