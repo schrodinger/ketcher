@@ -78,10 +78,6 @@ function api(base, defaultOptions) {
 	return Object.assign(info, {
 		convert: indigoCall('POST', 'indigo/convert'),
 		layout: indigoCall('POST', 'indigo/layout'),
-		clean: indigoCall('POST', 'indigo/clean'),
-		aromatize: indigoCall('POST', 'indigo/aromatize'),
-		dearomatize: indigoCall('POST', 'indigo/dearomatize'),
-		calculateCip: indigoCall('POST', 'indigo/calculate_cip'),
 		automap: indigoCall('POST', 'indigo/automap'),
 		check: indigoCall('POST', 'indigo/check'),
 		calculate: indigoCall('POST', 'indigo/calculate'),
