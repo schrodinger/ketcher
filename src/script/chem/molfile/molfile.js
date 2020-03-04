@@ -295,15 +295,14 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 		return;
 	}
 	this.writeCR('M  V30 BEGIN SGROUP');
-	var sgmap = {};
-	var cnt = 1;
+	var sGroupMap = {};
 	var sgmapback = {};
-	var sgorder = molecule.sGroupForest.getSGroupsBFS();
-	sgorder.forEach((id) => {
-		sgmapback[cnt] = id;
-		sgmap[id] = cnt++;
+	var sGroupOrder = molecule.sGroupForest.getSGroupsBFS();
+	sGroupOrder.forEach((id, index) => {
+		sgmapback[index + 1] = id;
+		sGroupMap[id] = index + 1;
 	});
-	for (var q = 1; q < cnt; ++q) { // each group on its own
+	for (var q = 1; q <= sGroupOrder.size; ++q) { // each group on its own
 		var id = sgmapback[q];
 		var sgroup = molecule.sgroups.get(id);
 		let sgDetails = `${this.getMol3000Prefix()}${id + 1} ${sgroup.type} 0`;
