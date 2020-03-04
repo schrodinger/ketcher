@@ -334,60 +334,7 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 		// 10. SAP
 		// 11. BRKTYP
 		if (sgroup.type === 'DAT') {
-			if (sgroup.data.fieldName.length > 0) {
-				// the name of data field for Data Sgroup.
-				sgDetails += ` FIELDNAME=${sgroup.data.fieldName}`;
-			}
-			// TODO: confirm whether FIELDINFO is just units.
-			if (sgroup.data.units && sgroup.data.units.length > 0) {
-				sgDetails += ` FIELDINFO=${sgroup.data.units}`;
-			}
-			if (sgroup.pp) {
-				// NOTE: please refer to https://drive.google.com/file/d/0Bx3dsPc7eyZKdXlHTktQTFJUMHc/view
-				//
-				// *Data Sgroup Display Information [Sgroup]*
-				// M SDD sss xxxxx.xxxxyyyyy.yyyy eeefgh i jjjkkk ll m noo
-				//
-				// sss: Index of data Sgroup
-				// x,y: Coordinates (2F10.4)
-				// eee: (Reserved for future use)
-				// f: Data display, A = attached, D = detached
-				// g: Absolute, relative placement, A = absolute, R = relative
-				// h: Display units, blank = no units displayed, U = display units
-				// i: (Reserved for future use)
-				// jjj: Number of characters to display (1...999 or ALL)
-				// kkk: Number of lines to display (unused, always 1)
-				// ll: (Reserved for future use)
-				// m: Tag character for tagged detached display (if non-blank)
-				// n: Data display DASP position (1...9). (MACCS-II only)
-				// oo: (Reserved for future use)
-				const x = this.getAtomCoordinate3000(sgroup.pp.x, 4).toString().padStart(10, ' ');
-				const y = this.getAtomCoordinate3000(-sgroup.pp.y, 4).toString().padStart(10, ' ');
-				const eee = '   ';
-				const f = sgroup.data.attached ? 'A' : 'D';
-				const g = sgroup.data.absolute ? 'A' : 'R';
-				const h = sgroup.data.showUnits ? 'U' : ' ';
-				const i = ' ';
-				const jjj = sgroup.data.nCharsToDisplay === -1 ? 'ALL' : sgroup.data.nCharsToDisplay.padStart(3, 0);
-				const kkk = '001';
-				const ll = ' ';
-				const m = sgroup.data.tagChar;
-				const n = sgroup.data.daspPos;
-				const oo = '  ';
-				sgDetails += ` FIELDDISP="${x}${y} ${eee}${f}${g}${h} ${i} ${jjj}${kkk} ${ll} ${m}  ${n}${oo}"`;
-			}
-			if (sgroup.data.query.length > 0) {
-				// querytype is the type of query or no query if missing.
-				sgDetails += ` QUERYTYPE=${sgroup.data.query}`;
-			}
-			if (sgroup.data.queryOp.length > 0) {
-				// queryop is the query operator
-				sgDetails += ` QUERYOP=${sgroup.data.queryOp}`;
-			}
-			if (sgroup.data.fieldValue.length > 0) {
-				// fielddata is the query or field data.
-				sgDetails += ` FIELDDATA=${sgroup.data.fieldValue}`;
-			}
+			this.writeSGroupDataAttributes3000(sgroup);
 		}
 		sgDetails += ` CONNECT=${sgroup.data.connectivity.toUpperCase()}`;
 		var parentId = this.molecule.sGroupForest.parent.get(id) + 1;
@@ -412,6 +359,65 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 		this.writeCR(sgDetailsLines.join('-\nM  V30 '));
 	}
 	this.writeCR('M  V30 END SGROUP');
+};
+
+Molfile.prototype.writeSGroupDataAttributes3000 = function (sgroup) {
+	let sgDetails = '';
+	if (sgroup.data.fieldName.length > 0) {
+		// the name of data field for Data Sgroup.
+		sgDetails += ` FIELDNAME=${sgroup.data.fieldName}`;
+	}
+	// TODO: confirm whether FIELDINFO is just units.
+	if (sgroup.data.units && sgroup.data.units.length > 0) {
+		sgDetails += ` FIELDINFO=${sgroup.data.units}`;
+	}
+	if (sgroup.pp) {
+		// NOTE: please refer to https://drive.google.com/file/d/0Bx3dsPc7eyZKdXlHTktQTFJUMHc/view
+		//
+		// *Data Sgroup Display Information [Sgroup]*
+		// M SDD sss xxxxx.xxxxyyyyy.yyyy eeefgh i jjjkkk ll m noo
+		//
+		// sss: Index of data Sgroup
+		// x,y: Coordinates (2F10.4)
+		// eee: (Reserved for future use)
+		// f: Data display, A = attached, D = detached
+		// g: Absolute, relative placement, A = absolute, R = relative
+		// h: Display units, blank = no units displayed, U = display units
+		// i: (Reserved for future use)
+		// jjj: Number of characters to display (1...999 or ALL)
+		// kkk: Number of lines to display (unused, always 1)
+		// ll: (Reserved for future use)
+		// m: Tag character for tagged detached display (if non-blank)
+		// n: Data display DASP position (1...9). (MACCS-II only)
+		// oo: (Reserved for future use)
+		const x = this.getAtomCoordinate3000(sgroup.pp.x, 4).toString().padStart(10, ' ');
+		const y = this.getAtomCoordinate3000(-sgroup.pp.y, 4).toString().padStart(10, ' ');
+		const eee = '   ';
+		const f = sgroup.data.attached ? 'A' : 'D';
+		const g = sgroup.data.absolute ? 'A' : 'R';
+		const h = sgroup.data.showUnits ? 'U' : ' ';
+		const i = ' ';
+		const jjj = sgroup.data.nCharsToDisplay === -1 ? 'ALL' : sgroup.data.nCharsToDisplay.padStart(3, 0);
+		const kkk = '001';
+		const ll = ' ';
+		const m = sgroup.data.tagChar;
+		const n = sgroup.data.daspPos;
+		const oo = '  ';
+		sgDetails += ` FIELDDISP="${x}${y} ${eee}${f}${g}${h} ${i} ${jjj}${kkk} ${ll} ${m}  ${n}${oo}"`;
+	}
+	if (sgroup.data.query.length > 0) {
+		// querytype is the type of query or no query if missing.
+		sgDetails += ` QUERYTYPE=${sgroup.data.query}`;
+	}
+	if (sgroup.data.queryOp.length > 0) {
+		// queryop is the query operator
+		sgDetails += ` QUERYOP=${sgroup.data.queryOp}`;
+	}
+	if (sgroup.data.fieldValue.length > 0) {
+		// fielddata is the query or field data.
+		sgDetails += ` FIELDDATA=${sgroup.data.fieldValue}`;
+	}
+	return sgDetails;
 };
 
 Molfile.prototype.writeAtomBlock3000 = function (molecule) {
