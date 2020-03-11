@@ -99,7 +99,7 @@ Molfile.prototype.saveMolecule = function (molecule, skipSGroupErrors, norgroups
 			this.writeV2000Reaction(molecule, reactants, products);
 	}
 
-	if (molecule.rgroups.size > 0) {
+	if (!this.v3000 && molecule.rgroups.size > 0) {
 		if (norgroups) {
 			molecule = molecule.getScaffold();
 		} else {
@@ -129,7 +129,8 @@ Molfile.prototype.saveMolecule = function (molecule, skipSGroupErrors, norgroups
 
 	if (this.v3000) {
 		this.writeHeaderV3000();
-		this.writeCTab3000(this.molecule);
+		this.writeCTab3000(this.molecule.getScaffold());
+		this.writeRGroups3000(this.molecule);
 		this.writeCR('M  END');
 	} else {
 		this.writeHeader();
@@ -287,6 +288,73 @@ Molfile.prototype.writeCTab3000 = function (molecule) { // eslint-disable-line m
 	this.writeCR('M  V30 END CTAB');
 };
 
+/**
+ * Writes R-Group block for each R-Group in the structure
+ * @param molecule
+ */
+Molfile.prototype.writeRGroups3000 = function (molecule) { // eslint-disable-line max-statements
+	/* saver */
+	if (molecule.rgroups.size === 0) {
+		return;
+	}
+	molecule.rgroups.forEach((rgroup, id) => {
+		this.writeRGroup3000(molecule, rgroup, id);
+	});
+};
+
+/**
+ * Writes R Group Block in V3000 format
+ *
+ *
+ * Example of an R Group Block
+ *
+	 M  V30 BEGIN RGROUP 1
+	 M  V30 RLOGIC 0 0 ""
+	 M  V30 BEGIN CTAB
+	 M  V30 COUNTS 5 5 0 0 0
+	 M  V30 BEGIN ATOM
+	 M  V30 1 C -2.9792 2.0183 0 0
+	 M  V30 2 C -4.225 1.113 0 0
+	 M  V30 3 C -3.7492 -0.3516 0 0
+	 M  V30 4 C -2.2092 -0.3516 0 0
+	 M  V30 5 C -1.7334 1.113 0 0
+	 M  V30 END ATOM
+	 M  V30 BEGIN BOND
+	 M  V30 1 1 1 2
+	 M  V30 2 1 1 5
+	 M  V30 3 1 2 3
+	 M  V30 4 1 3 4
+	 M  V30 5 1 4 5
+	 M  V30 END BOND
+	 M  V30 END CTAB
+	 M  V30 END RGROUP
+
+ * @param molecule
+ * @param rgroup
+ * @param id
+ */
+Molfile.prototype.writeRGroup3000 = function (molecule, rgroup, id) { // eslint-disable-line max-statements
+	/* saver */
+	this.writeCR(`M  V30 BEGIN RGROUP ${id}`);
+	this.writeCR(`M  V30 RLOGIC ${rgroup.ifthen} ${rgroup.resth ? 1 : 0} ${rgroup.range}`);
+	rgroup.frags.forEach((fid) => {
+		this.writeCTab3000(molecule.getFragment(fid));
+	});
+	this.writeCR('M  V30 END RGROUP');
+};
+
+/**
+ * Writes Atom Block for V3000 format
+ *
+ * Example Atom Block:
+ *
+	 M  V30 BEGIN ATOM
+	 M  V30 1 C -7.3393 7.2781 0 0
+	 M  V30 2 C -8.673 6.5081 0 0
+	 M  V30 3 C -6.0056 6.5081 0 0
+	 M  V30 END ATOM
+ * @param molecule
+ */
 Molfile.prototype.writeAtomBlock3000 = function (molecule) {
 	if (molecule.atoms.size === 0) {
 		return;
@@ -353,6 +421,17 @@ Molfile.prototype.writeAtomBlock3000 = function (molecule) {
 	this.writeCR('M  V30 END ATOM');
 };
 
+/**
+ * Writes Bond Block for V3000 format
+ *
+ * Example Bond Block:
+ *
+	 M  V30 BEGIN BOND
+	 M  V30 1 1 1 2
+	 M  V30 2 1 1 3
+	 M  V30 END BOND
+ * @param molecule
+ */
 Molfile.prototype.writeBondBlock3000 = function (molecule) {
 	if (molecule.bonds.size === 0) {
 		return;
