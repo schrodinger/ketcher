@@ -162,6 +162,8 @@ function v3000parseSGroup(ctab, ctabLines, sgroups, atomMap, shift) { // eslint-
 			sg.data.connectivity = props['CONNECT'][0].toLowerCase();
 		if (props['FIELDDISP'])
 			sGroup.applyDataSGroupInfo(sg, stripQuotes(props['FIELDDISP'][0]));
+		if (props['FIELDINFO'])
+			sg.data.units = props['FIELDINFO'][0];
 		if (props['FIELDDATA'])
 			sGroup.applyDataSGroupData(sg, props['FIELDDATA'][0], true);
 		if (props['FIELDNAME'])
