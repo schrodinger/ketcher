@@ -136,7 +136,6 @@ Molfile.prototype.saveMolecule = function (molecule, skipSGroupErrors, norgroups
 		this.writeHeader();
 		this.writeCTab2000();
 	}
-
 	return this.molfile;
 };
 
@@ -274,7 +273,6 @@ Molfile.prototype.writeCTab2000Header = function () {
 	this.writePaddedNumber(999, 3);
 	this.writeCR(' V2000');
 };
-
 
 Molfile.prototype.writeCTab3000 = function (molecule) { // eslint-disable-line max-statements
 	/* saver */

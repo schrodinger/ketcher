@@ -11,8 +11,23 @@
 		<link rel="apple-touch-icon" sizes="180x180" href="logo/apple-touch-icon.png">
 
     <link rel="stylesheet" href="{{pkg.name}}.css">
+    <script>
+			var Module = {
+				onRuntimeInitialized: function () {
+					// RDKitJS WebAssembly has successfully completed compilation.
+					// We can enable the RDKit JS-powered tools at this point.
+					var rdKitJsTools = document.getElementsByClassName('rdkitjs');
+					Array.from(rdKitJsTools).forEach((tool) => {
+					  tool.removeAttribute('disabled');
+					});
+				}
+			};
+		</script>
 		<script src="raphael.min.js"></script>
 		<script src="{{pkg.name}}.js"></script>
+		<script src="https://rdkit.org/rdkitjs/beta/RDKit_minimal.js"></script>
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+
 
     {{#if miew}}
         <link rel="stylesheet" href="Miew.min.css">
