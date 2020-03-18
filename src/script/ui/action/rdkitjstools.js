@@ -34,5 +34,13 @@ export default {
 		},
 		className: 'rdkitjs',
 		disabled: () => true
+	},
+	explicitHydrogen: {
+		title: 'Add/Remove Explicit Hydrogen',
+		action: {
+			thunk: rdkitJsTransform('toggleExplicitHydrogen')
+		},
+		className: 'rdkitjs',
+		disabled: () => true
 	}
 };
