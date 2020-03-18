@@ -137,7 +137,7 @@ function v3000parseSGroup(ctab, ctabLines, sgroups, atomMap, shift) { // eslint-
 		var props = {};
 		for (var i = 3; i < split.length; ++i) {
 			var subsplit = splitonce(split[i], '=');
-			if (subsplit.length != 2)
+			if (subsplit.length !== 2 || subsplit[0].length === 0 || subsplit[1].length === 0)
 				throw new Error('A record of form AAA=BBB or AAA=(...) expected, got \'' + split[i] + '\'');
 			var name = subsplit[0];
 			if (!(name in props))

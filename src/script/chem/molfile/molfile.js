@@ -304,21 +304,21 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 	for (var q = 1; q <= sGroupOrder.size; ++q) { // each group on its own
 		var id = sgmapback[q];
 		var sgroup = molecule.sgroups.get(id);
-		let sgDetails = `${this.getMol3000Prefix()}${id + 1} ${sgroup.type} 0`;
+		let sgDetails = `${this.getMol3000Prefix()}${this.fromKetcherIndex(id)} ${sgroup.type} 0`;
 		if (sgroup.atoms.length) {
 			// atoms that define the Sgroup
 			// ATOMS=(natoms aidx1 aidx2 ..)
-			sgDetails += ` ATOMS=(${sgroup.atoms.length} ${sgroup.atoms.map(atom => atom + 1).join(' ')})`;
+			sgDetails += ` ATOMS=(${sgroup.atoms.length} ${sgroup.atoms.map(atom => this.fromKetcherIndex(atom)).join(' ')})`;
 		}
 		if (sgroup.bonds && sgroup.bonds.length) {
 			// crossing bonds
 			// XBONDS=(nxbonds bidx1 bidx2 ..)
-			sgDetails += ` XBONDS=(${sgroup.bonds.length} ${sgroup.bonds.map(bond => bond + 1).join(' ')})`;
+			sgDetails += ` XBONDS=(${sgroup.bonds.length} ${sgroup.bonds.map(bond => this.fromKetcherIndex(bond)).join(' ')})`;
 		}
 		if (sgroup.patoms) {
 			// paradigmatic repeating unit atoms
 			// PATOMS=(npatoms aidx1 aidx2 ..)
-			sgDetails += ` PATOMS=(${sgroup.patoms.length} ${sgroup.patoms.map(patom => patom + 1).join(' ')})`;
+			sgDetails += ` PATOMS=(${sgroup.patoms.length} ${sgroup.patoms.map(patom => this.fromKetcherIndex(patom)).join(' ')})`;
 		}
 		// TODO: Add support for following:
 		// 1. CBONDS
@@ -336,7 +336,7 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 			this.writeSGroupDataAttributes3000(sgroup);
 		}
 		sgDetails += ` CONNECT=${sgroup.data.connectivity.toUpperCase()}`;
-		var parentId = this.molecule.sGroupForest.parent.get(id) + 1;
+		var parentId = this.fromKetcherIndex(this.molecule.sGroupForest.parent.get(id));
 		if (parentId > 0) {
 			// parent Sgroup index.
 			sgDetails += ` PARENT=${parentId}`;
@@ -354,10 +354,31 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
 		}
 		// display label for this Sgroup.
 		sgDetails += ` LABEL=${sgroup.data.subscript}`;
-		const sgDetailsLines = sgDetails.match(/.{1,70}/g);
-		this.writeCR(sgDetailsLines.join('-\nM  V30 '));
+		this.splitAndWriteMolV3000Lines(sgDetails);
 	}
 	this.writeCR('M  V30 END SGROUP');
+};
+
+/**
+ * 1. Splits a single string of MOL V3000 line, into multiple lines
+ *    each having length no greater than ~ 80 characters.
+ * 2. Writes these strings (lines) to the MOL V3000 representation.
+ *
+ * From page 80 of the spec,
+ *
+ * To allow continuation when the 80-character line is too short, use a dash (-) as the last character.
+ * When read, the line is concatenated with the next line by removing the dash
+ * and stripping the initial "M V30" from the following line. For example:
+ * M V30 10 20 30 “abc-
+ * M V30 def”
+ * is read as:
+ * M V30 10 20 30 "abc def"
+ *
+ * @param text
+ */
+Molfile.prototype.splitAndWriteMolV3000Lines = function (text) {
+	const textLines = text.match(/.{1, 70}/g);
+	this.writeCR(textLines.join('-\nM  V30 '));
 };
 
 Molfile.prototype.writeSGroupDataAttributes3000 = function (sgroup) {
@@ -494,7 +515,7 @@ Molfile.prototype.writeAtomBlock3000 = function (molecule) {
 	this.writeCR('M  V30 BEGIN ATOM');
 	molecule.atoms.forEach((atom, id) => {
 		let atomDetails = this.getMol3000Prefix();
-		atomDetails += `${id + 1} `;
+		atomDetails += `${this.fromKetcherIndex(id)} `;
 		atomDetails += this.getAtomType(atom);
 		atomDetails += ' ';
 		// It would be uniform to keep a maximum of 4 decimal places,
@@ -547,11 +568,21 @@ Molfile.prototype.writeAtomBlock3000 = function (molecule) {
 		// 3. STBOX - Stereo box
 		// 4. ATTCHORD - Attachment order
 
-		const atomDetailsLines = atomDetails.match(/.{1,70}/g);
-		this.writeCR(atomDetailsLines.join('-\nM  V30 '));
+		this.splitAndWriteMolV3000Lines(atomDetails);
 	});
 	this.writeCR('M  V30 END ATOM');
 };
+
+/**
+ * Ketcher's struct object maintains indices as 0-based,
+ * but we write them as 1-based indices to the outside world.
+ * This helper simply converts a 0-based index to its corresponding 1-based index.
+ *
+ * @param index
+ */
+Molfile.prototype.fromKetcherIndex = function (index) {
+	return index + 1;
+}
 
 /**
  * Writes Bond Block for V3000 format
@@ -571,12 +602,12 @@ Molfile.prototype.writeBondBlock3000 = function (molecule) {
 	this.writeCR('M  V30 BEGIN BOND');
 	molecule.bonds.forEach((bond, id) => {
 		let bondDetails = this.getMol3000Prefix();
-		bondDetails += `${id + 1} `;
+		bondDetails += `${this.fromKetcherIndex(id)} `;
 		bondDetails += bond.type;
 		bondDetails += ' ';
-		bondDetails += bond.begin + 1;
+		bondDetails += this.fromKetcherIndex(bond.begin);
 		bondDetails += ' ';
-		bondDetails += bond.end + 1;
+		bondDetails += this.fromKetcherIndex(bond.end);
 
 		if (bond.topology !== 0) {
 			bondDetails += ` TOPO=${bond.topology}`;
@@ -589,8 +620,7 @@ Molfile.prototype.writeBondBlock3000 = function (molecule) {
 		}
 		// TODO: Add support for following:
 		// 1. STBOX - Stereo box
-		const bondDetailsLines = bondDetails.match(/.{1,70}/g);
-		this.writeCR(bondDetailsLines.join('-\nM  V30 '));
+		this.splitAndWriteMolV3000Lines(bondDetails);
 	});
 	this.writeCR('M  V30 END BOND');
 };
@@ -735,7 +765,7 @@ Molfile.prototype.writeCTab2000 = function (rgroups) { // eslint-disable-line ma
 
 	while (atomProps_list.length > 0) {
 		this.write('A  ');
-		this.writePaddedNumber(atomProps_list[0].id + 1, 3);
+		this.writePaddedNumber(this.fromKetcherIndex(atomProps_list[0].id), 3);
 		this.writeCR();
 		this.writeCR(atomProps_list[0].value);
 		atomProps_list.splice(0, 1);
@@ -760,7 +790,7 @@ Molfile.prototype.writeCTab2000 = function (rgroups) { // eslint-disable-line ma
 			radicalList.push([id, atom.radical]);
 		if (atom.rglabel != null && atom.label == 'R#') { // TODO need to force rglabel=null when label is not 'R#'
 			for (var rgi = 0; rgi < 32; rgi++)
-				if (atom.rglabel & (1 << rgi)) rglabelList.push([id, rgi + 1]);
+				if (atom.rglabel & (1 << rgi)) rglabelList.push([id, this.fromKetcherIndex(rgi)]);
 		}
 		if (atom.attpnt != null)
 			aplabelList.push([id, atom.attpnt]);
@@ -824,7 +854,7 @@ Molfile.prototype.writeCTab2000 = function (rgroups) { // eslint-disable-line ma
 			var aid = atomList_list[j];
 			var atomList = this.molecule.atoms.get(aid).atomList;
 			this.write('M  ALS');
-			this.writePaddedNumber(aid + 1, 4);
+			this.writePaddedNumber(this.fromKetcherIndex(aid), 4);
 			this.writePaddedNumber(atomList.ids.length, 3);
 			this.writeWhiteSpace();
 			this.write(atomList.notList ? 'T' : 'F');
