@@ -15,14 +15,14 @@ export function rdkitJsTransform(method) {
 	return (dispatch, getState) => {
 		const state = getState();
 		const struct = state.editor.struct().clone(null, null, false, new Map());
-		const molDetails = getStructDetails(struct);
+		const hasExplicitHydrogen = !!struct.hasExplicitHydrogen();
 		const mol = Module.get_mol(molfile.stringify(struct, // eslint-disable-line no-undef
 			{ ignoreErrors: true }));
 		if (!mol.is_valid()) {
 			alert(`The specified input molecule is invalid.`);
 			return;
 		}
-		dispatch(load(doTransformation(method, mol, molDetails), {
+		dispatch(load(doTransformation(method, mol, hasExplicitHydrogen), {
 			rescale: method === 'layout',
 			reactionRelayout: method === 'clean'
 		}));
@@ -94,10 +94,10 @@ function deleteAllSGroupsWithName(restruct, action, fieldName) {
 /**
  * @param method {string}
  * @param mol {*} TODO (pradeep): Figure out a typedef for mol
- * @param molDetails {StructDetails}
+ * @param hasExplicitHydrogen {boolean}
  * @return {*}
  */
-function doTransformation(method, mol, molDetails) {
+function doTransformation(method, mol, hasExplicitHydrogen) {
 	switch (method) {
 		case 'aromatize':
 			return mol.get_aromatic_form();
@@ -106,7 +106,7 @@ function doTransformation(method, mol, molDetails) {
 		case 'clean':
 			return mol.get_new_coords();
 		case 'toggleExplicitHydrogen':
-			if (molDetails.hasExplicitHydrogen) {
+			if (hasExplicitHydrogen) {
 				return mol.remove_hs();
 			} else {
 				return mol.add_hs();
@@ -115,20 +115,3 @@ function doTransformation(method, mol, molDetails) {
 			return '';
 	}
 }
-
-/**
- * @param struct {Struct}
- * @return {StructDetails}
- */
-function getStructDetails(struct) {
-	return {
-		hasExplicitHydrogen: !!struct.hasExplicitHydrogen(),
-	};
-}
-
-/**
- * @typedef {{
- *   hasExplicitHydrogen: boolean
- * }}
- */
-const StructDetails = {};
