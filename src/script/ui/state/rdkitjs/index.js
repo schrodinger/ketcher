@@ -15,7 +15,7 @@ export function rdkitJsTransform(method) {
 	return (dispatch, getState) => {
 		const state = getState();
 		const struct = state.editor.struct().clone(null, null, false, new Map());
-		const hasExplicitHydrogen = !!struct.hasExplicitHydrogen();
+		const hasExplicitHydrogen = struct.hasExplicitHydrogen();
 		const mol = Module.get_mol(molfile.stringify(struct, // eslint-disable-line no-undef
 			{ ignoreErrors: true }));
 		if (!mol.is_valid()) {
