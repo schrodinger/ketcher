@@ -27,10 +27,12 @@ import Bond from './bond';
 import SGroup from './sgroup';
 import RGroup from './rgroup';
 import SGroupForest from './sgforest';
+import EnhancedStereo from './enhancedstereo';
 
 function Struct() {
 	this.atoms = new Pool();
 	this.bonds = new Pool();
+	this.enhancedStereo = new EnhancedStereo(this);
 	this.sgroups = new Pool();
 	this.halfBonds = new Pool();
 	this.loops = new Pool();

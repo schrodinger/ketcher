@@ -83,9 +83,13 @@ function setMolecule(molString) {
 	$.ajax({
 		type: "POST",
 		url: '/plexus/rest-v0/util/calculate/stringMolExport',
-		data: { structure: molString, parameters: 'MOL' }
-	}).done(function updateInputCompound(smiles) {
-		ketcher.ui.load(smiles, {
+		data: { structure: molString, parameters: 'mol:V3' }
+	}).done(function updateInputCompound(molfile) {
+		ketcher.ui.load(molfile, {
+			rescale: true
+		});
+	}).fail(function onError() {
+		ketcher.ui.load(molString, {
 			rescale: true
 		});
 	});
