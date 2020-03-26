@@ -267,7 +267,8 @@ export default connect(
 		status: state.actionState || {},
 		freqAtoms: state.toolbar.freqAtoms,
 		opened: state.toolbar.opened,
-		visibleTools: state.toolbar.visibleTools
+		visibleTools: state.toolbar.visibleTools,
+		toolbarType: state.toolbar.toolbarType
 	}),	{
 		onOpen: (menuName, isSelected) => ({ type: 'OPENED', data: { menuName, isSelected } })
 	}

@@ -21,6 +21,7 @@ import queryString from 'query-string';
 import api from './api';
 import molfile from './chem/molfile';
 import smiles from './chem/smiles';
+import toolbarTypeMap from './ui/state/toolbar/toolbartypes';
 import * as structformat from './ui/data/convert/structformat';
 
 import ui from './ui';
@@ -117,6 +118,14 @@ function showMolfile(clientArea, molString, options) {
 	return render;
 }
 
+/**
+ * Sets the toolbar type for Ketcher
+ * @param toolbarType {toolbarTypeMap}
+ */
+function setToolbarType(toolbarType) {
+	ketcher.ui.changeToolbarType(toolbarType);
+}
+
 // TODO: replace window.onload with something like <https://github.com/ded/domready>
 // to start early
 window.onload = function () {
@@ -153,6 +162,7 @@ const ketcher = module.exports = Object.assign({ // eslint-disable-line no-multi
 	getMolfile,
 	getRepresentationInFormat,
 	setMolecule,
+	setToolbarType,
 	addFragment,
 	showMolfile
 }, buildInfo);
