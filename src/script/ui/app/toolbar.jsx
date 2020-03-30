@@ -66,6 +66,7 @@ const mainmenu = [
 			'clean',
 			'arom',
 			'dearom',
+			'explicitHydrogen',
 			'cip',
 			'check',
 			'analyse',

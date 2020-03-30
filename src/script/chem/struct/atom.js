@@ -135,6 +135,11 @@ Atom.prototype.isQuery = function () {
 	return this.atomList !== null || this.label === 'A' || this.attpnt || this.hCount;
 };
 
+/** @return {boolean} */
+Atom.prototype.isHydrogen = function () {
+	return this.label === 'H';
+};
+
 Atom.prototype.pureHydrogen = function () {
 	return this.label === 'H' && this.isotope === 0;
 };

@@ -46,6 +46,11 @@ function Struct() {
 	this.sGroupForest = new SGroupForest(this);
 }
 
+/** @return {boolean} */
+Struct.prototype.hasExplicitHydrogen = function () {
+	return this.atoms.find((aid, atom) => atom.isHydrogen()) !== null;
+};
+
 Struct.prototype.hasRxnProps = function () {
 	return this.atoms.find((aid, atom) => atom.hasRxnProps()) ||
 		this.bonds.find((bid, bond) => bond.hasRxnProps());
