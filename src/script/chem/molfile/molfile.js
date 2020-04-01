@@ -562,9 +562,11 @@ Molfile.prototype.writeAtomBlock3000 = function (molecule) {
 		if (atom.rglabel != null && atom.label === 'R#') {
 			atomDetails += ` RGROUPS=(1 ${atom.rglabel})`;
 		}
+		if (atom.isotope !== 0) {
+			atomDetails += ` MASS=${atom.isotope}`;
+		}
 		// TODO: Add support for following:
 		// 1. CFG - Stereo configuration
-		// 2. MASS - Atomic weight
 		// 3. STBOX - Stereo box
 		// 4. ATTCHORD - Attachment order
 
