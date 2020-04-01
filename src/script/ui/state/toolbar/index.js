@@ -24,7 +24,8 @@ const initial = {
 	opened: null,
 	visibleTools: {
 		select: 'select-lasso'
-	}
+	},
+	toolbarType: 'ABC'
 };
 const MAX_ATOMS = 7;
 
@@ -61,6 +62,12 @@ export function initIcons(cacheEl) {
 	});
 }
 
+export function updateToolbarType(toolbarType) {
+	return (dispatch) => {
+		dispatch({ type: 'UPDATE_TOOLBAR_TYPE', data: toolbarType });
+	};
+}
+
 /* REDUCER */
 export default function (state = initial, action) {
 	const { type, data } = action;
@@ -90,6 +97,8 @@ export default function (state = initial, action) {
 		return { ...state, opened: null };
 	case 'MODAL_OPEN':
 		return { ...state, opened: null };
+	case 'UPDATE_TOOLBAR_TYPE':
+		return { ...state, toolbarType: data };
 	default:
 		return state;
 	}

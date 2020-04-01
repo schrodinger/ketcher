@@ -21,6 +21,7 @@ import classNames from 'classnames';
 import action from '../action';
 import { hiddenAncestor } from '../state/toolbar';
 import Icon from './view/icon';
+import toolbarTypeMap from '../state/toolbar/toolbartypes';
 
 const isMac = /Mac/.test(navigator.platform); // eslint-disable-line no-undef
 const shortcutAliasMap = {
@@ -62,8 +63,11 @@ export function showMenuOrButton(action, item, status, props) { // eslint-disabl
 	return (item.component(props));
 }
 
-function ActionButton({ name, action, status = {}, onAction }) { // eslint-disable-line no-shadow
+function ActionButton({ name, action, status = {}, onAction, toolbarType}) { // eslint-disable-line no-shadow
 	const shortcut = action.shortcut && shortcutStr(action.shortcut);
+	if (toolbarTypeMap[toolbarType].includes(action.title)) {
+		return;
+	}
 	return (
 		<button
 			disabled={status.disabled}

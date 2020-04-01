@@ -21,6 +21,7 @@ import queryString from 'query-string';
 import api from './api';
 import molfile from './chem/molfile';
 import smiles from './chem/smiles';
+import toolbarTypeMap from './ui/state/toolbar/toolbartypes';
 import * as structformat from './ui/data/convert/structformat';
 
 import ui from './ui';
@@ -83,7 +84,7 @@ function setMolecule(molString) {
 	$.ajax({
 		type: "POST",
 		url: '/plexus/rest-v0/util/calculate/stringMolExport',
-		data: { structure: molString, parameters: 'MOL:V3' }
+		data: { structure: molString, parameters: 'mol:V3' }
 	}).done(function updateInputCompound(molfile) {
 		ketcher.ui.load(molfile, {
 			rescale: true
@@ -115,6 +116,14 @@ function showMolfile(clientArea, molString, options) {
 	render.update();
 	// not sure we need to expose guts
 	return render;
+}
+
+/**
+ * Sets the toolbar type for Ketcher
+ * @param toolbarType {toolbarTypeMap}
+ */
+function setToolbarType(toolbarType) {
+	ketcher.ui.changeToolbarType(toolbarType);
 }
 
 // TODO: replace window.onload with something like <https://github.com/ded/domready>
@@ -153,6 +162,7 @@ const ketcher = module.exports = Object.assign({ // eslint-disable-line no-multi
 	getMolfile,
 	getRepresentationInFormat,
 	setMolecule,
+	setToolbarType,
 	addFragment,
 	showMolfile
 }, buildInfo);
