@@ -22,4 +22,16 @@ function EnhancedStereo(molecule) {
 	this.rel = new Pool(); // n -> list of atom ids // relative stereo info
 	this.molecule = molecule;
 }
+
+/**
+ * @return {EnhancedStereo}
+ */
+EnhancedStereo.prototype.clone = function() {
+	const cp = new EnhancedStereo(this.molecule);
+	cp.abs = this.abs.slice();
+	cp.rac = new Pool(this.rac);
+	cp.rel = new Pool(this.rel);
+	return cp;
+};
+
 export default EnhancedStereo;

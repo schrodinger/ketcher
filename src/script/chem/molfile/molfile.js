@@ -285,6 +285,7 @@ Molfile.prototype.writeCTab3000 = function (molecule) { // eslint-disable-line m
 	this.writeCR(`M  V30 COUNTS ${noOfAtoms} ${noOfBonds} ${noOfSGroups} 0 ${isChiral}`);
 	this.writeAtomBlock3000(molecule);
 	this.writeBondBlock3000(molecule);
+	this.writeCollectionBlock3000(molecule);
 	this.writeSGroupBlock3000(molecule);
 	this.writeCR('M  V30 END CTAB');
 };
@@ -377,7 +378,7 @@ Molfile.prototype.writeSGroupBlock3000 = function (molecule) {
  * @param text
  */
 Molfile.prototype.splitAndWriteMolV3000Lines = function (text) {
-	const textLines = text.match(/.{1, 70}/g);
+	const textLines = text.match(/.{1,70}/g);
 	this.writeCR(textLines.join('-\nM  V30 '));
 };
 
@@ -625,6 +626,53 @@ Molfile.prototype.writeBondBlock3000 = function (molecule) {
 		this.splitAndWriteMolV3000Lines(bondDetails);
 	});
 	this.writeCR('M  V30 END BOND');
+};
+
+/**
+ * @param {Struct} molecule
+ *
+ * Example collection block:
+ * 	M  V30 BEGIN COLLECTION
+ * 	M  V30 MDLV30/STEABS ATOMS=(2 3 4)
+ * 	M  V30 MDLV30/STEREL4 ATOMS=(1 2)
+ * 	M  V30 MDLV30/STERAC5 ATOMS=(2 1 6)
+ * 	M  V30 END COLLECTION
+ */
+Molfile.prototype.writeCollectionBlock3000 = function (molecule) {
+	const { abs, rac, rel } = molecule.enhancedStereo;
+	this.writeCR('M  V30 BEGIN COLLECTION');
+
+	// Absolute stereochemistry collection
+	// eg: M  V30 MDLV30/STEABS ATOMS=(2 3 4)
+	if (abs.length) {
+		const atomIndices = abs.map(this.fromKetcherIndex).join(' ');
+		let absoluteDetails = this.getMol3000Prefix();
+		absoluteDetails += `MDLV30/STEABS ATOMS=(${abs.length} ${atomIndices})`;
+		const absoluteDetailsLines = absoluteDetails.match(/.{1,70}/g);
+		this.writeCR(absoluteDetailsLines.join(' -\nM  V30 '));
+	}
+
+	// Relative stereochemistry collection
+	// eg: M  V30 MDLV30/STEREL4 ATOMS=(1 2)
+	for (let [relLabel, relIndices] of rel.entries()) {
+		const atomIndices = relIndices.map(this.fromKetcherIndex).join(' ');
+		let absoluteDetails = this.getMol3000Prefix();
+		absoluteDetails += `MDLV30/STEREL${relLabel} ATOMS=(${relIndices.length} ${atomIndices})`;
+		const absoluteDetailsLines = absoluteDetails.match(/.{1,70}/g);
+		this.writeCR(absoluteDetailsLines.join(' -\nM  V30 '));
+	}
+
+	// "Racemic" stereochemistry collection
+	// eg: M  V30 MDLV30/STERAC5 ATOMS=(2 1 6)
+	for (let [racLabel, racIndices] of rac.entries()) {
+		const atomIndices = racIndices.map(this.fromKetcherIndex).join(' ');
+		let absoluteDetails = this.getMol3000Prefix();
+		absoluteDetails += `MDLV30/STERAC${racLabel} ATOMS=(${racIndices.length} ${atomIndices})`;
+		const absoluteDetailsLines = absoluteDetails.match(/.{1,70}/g);
+		this.writeCR(absoluteDetailsLines.join(' -\nM  V30 '));
+	}
+
+	this.writeCR('M  V30 END COLLECTION');
 };
 
 Molfile.prototype.getMol3000Prefix = function () {
