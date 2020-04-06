@@ -27,10 +27,12 @@ import Bond from './bond';
 import SGroup from './sgroup';
 import RGroup from './rgroup';
 import SGroupForest from './sgforest';
+import EnhancedStereo from './enhancedstereo';
 
 function Struct() {
 	this.atoms = new Pool();
 	this.bonds = new Pool();
+	this.enhancedStereo = new EnhancedStereo(this);
 	this.sgroups = new Pool();
 	this.halfBonds = new Pool();
 	this.loops = new Pool();
@@ -43,6 +45,11 @@ function Struct() {
 	this.name = '';
 	this.sGroupForest = new SGroupForest(this);
 }
+
+/** @return {boolean} */
+Struct.prototype.hasExplicitHydrogen = function () {
+	return this.atoms.find((aid, atom) => atom.isHydrogen()) !== null;
+};
 
 Struct.prototype.hasRxnProps = function () {
 	return this.atoms.find((aid, atom) => atom.hasRxnProps()) ||
@@ -193,6 +200,8 @@ Struct.prototype.mergeInto = function (cp, atomSet, bondSet, dropRxnSymbols, kee
 		else
 			cp.sGroupForest.insert(sg.id);
 	});
+
+	cp.enhancedStereo = this.enhancedStereo.clone();
 
 	cp.isChiral = cp.isChiral || this.isChiral;
 

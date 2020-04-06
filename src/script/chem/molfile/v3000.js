@@ -111,8 +111,25 @@ function parseBondLineV3000(line) {
 function v3000parseCollection(ctab, ctabLines, shift) {
 	/* reader */
 	shift++;
-	while (ctabLines[shift].trim() != 'M  V30 END COLLECTION')
+	while (ctabLines[shift].trim() != 'M  V30 END COLLECTION') {
+		const line = ctabLines[shift];
+		const atoms = line.substr(line.indexOf("ATOMS"), line.length);
+		const subsplit = splitonce(atoms, '=');
+		if (subsplit.length != 2)
+			throw new Error('A record of form AAA=BBB or AAA=(...) expected, got \'' + split[i] + '\'');
+		const name = subsplit[0];
+		const prop = { [name]: subsplit[1] };
+		if (line.includes('STEABS')) {
+			ctab.enhancedStereo.abs = parseBracedNumberList(prop['ATOMS'], -1);
+		} else if (line.includes('STERAC')) {
+			const n = line.substring(line.indexOf('STERAC') + 6, line.indexOf('ATOMS')).trim();
+			ctab.enhancedStereo.rac.set(parseInt(n, 10), parseBracedNumberList(prop['ATOMS'], -1));
+		} else if (line.includes('STEREL')) {
+			const n = line.substring(line.indexOf('STEREL') + 6, line.indexOf('ATOMS')).trim();
+			ctab.enhancedStereo.rel.set(parseInt(n, 10), parseBracedNumberList(prop['ATOMS'], -1));
+		}
 		shift++;
+	}
 	shift++;
 	return shift;
 }
@@ -137,7 +154,7 @@ function v3000parseSGroup(ctab, ctabLines, sgroups, atomMap, shift) { // eslint-
 		var props = {};
 		for (var i = 3; i < split.length; ++i) {
 			var subsplit = splitonce(split[i], '=');
-			if (subsplit.length != 2)
+			if (subsplit.length !== 2 || subsplit[0].length === 0 || subsplit[1].length === 0)
 				throw new Error('A record of form AAA=BBB or AAA=(...) expected, got \'' + split[i] + '\'');
 			var name = subsplit[0];
 			if (!(name in props))
@@ -162,6 +179,8 @@ function v3000parseSGroup(ctab, ctabLines, sgroups, atomMap, shift) { // eslint-
 			sg.data.connectivity = props['CONNECT'][0].toLowerCase();
 		if (props['FIELDDISP'])
 			sGroup.applyDataSGroupInfo(sg, stripQuotes(props['FIELDDISP'][0]));
+		if (props['FIELDINFO'])
+			sg.data.units = props['FIELDINFO'][0];
 		if (props['FIELDDATA'])
 			sGroup.applyDataSGroupData(sg, props['FIELDDATA'][0], true);
 		if (props['FIELDNAME'])
