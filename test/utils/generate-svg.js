@@ -41,22 +41,29 @@ browserSession((browser, testDir) => {
 				width: 600,
 				height: 400
 			};
+			console.log("niranjan col names - ", colname, name, sampleName);
 			let spinner = ora(sampleName);
-			browser.then(() => spinner.start());
+			browser.then(() => {
+				console.log("niranjan - starting spinner");
+				spinner.start()
+			});
 			browser = browser
 				.execute(function (structStr, opts) {
+					console.log("Niranjan - browser execute");
 					window.renderTest(structStr, opts);
 				}, structStr, opts)
 				.waitForExist('#canvas-ketcher')
 				.getHTML('#canvas-ketcher', false).then(svg => {
-					// console.info(sampleName, svg.replace(/.*(viewBox=".+?").*/, "$1"));
+					console.log(sampleName, svg.replace(/.*(viewBox=".+?").*/, "$1"));
 					sprites.add(sampleName, svg);
 					spinner.succeed();
 				});
 		}
 	}
+	console.log("Niranjan - generate svg")
 	return browser.then(() => {
 		// TODO should it be cmd arg?
+		console.log("Niranjan - sprites - ", sprites)
 		fs.writeFileSync('test/fixtures/fixtures.svg', sprites);
 	});
 });

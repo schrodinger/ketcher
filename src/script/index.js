@@ -132,6 +132,7 @@ window.onload = function () {
 	const params = queryString.parse(document.location.search);
 	if (params.api_path)
 		ketcher.apiPath = params.api_path;
+	console.log("niranjan - ketcher ready");
 	ketcher.server = api(ketcher.apiPath, {
 		'smart-layout': true,
 		'ignore-stereochemistry-errors': true,

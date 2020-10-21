@@ -3,7 +3,7 @@
   "version": "2.0.0-RC",
   "description": "Web-based molecule sketcher",
   "license": "Apache-2.0",
-  "main": "ketcher.js",
+  "main": "dist/ketcher.js",
   "homepage": "http://lifescience.opensource.epam.com/ketcher",
   "author": {
     "name": "EPAM Life Sciences",
@@ -43,7 +43,7 @@
     "eslint-plugin-jsx-a11y": "6.0.2",
     "eslint-plugin-react": "7.5.1",
     "exposify": "0.5.0",
-    "gulp": "3.9.1",
+    "gulp": "4.0.2",
     "gulp-autoprefixer": "4.0.0",
     "gulp-babel": "7.0.0",
     "gulp-clean-css": "3.1.1",
@@ -69,8 +69,8 @@
     "svgstore": "2.0.2",
     "tap": "11.1.2",
     "through2": "2.0.3",
-    "vinyl-buffer": "1.0.0",
-    "vinyl-source-stream": "1.1.0",
+    "vinyl-buffer": "1.0.1",
+    "vinyl-source-stream": "2.0.0",
     "webdriverio": "4.8.0",
     "xmldom": "0.1.27",
     "xpath": "0.0.24"

@@ -65,6 +65,7 @@ function createEl(name, opts, parent) {
 }
 
 function ketcherRender(structStr, options) {
+	console.log("Niranjan - ketcher render");
 	let opts = Object.assign({}, defaultOpts, options);
 	var target = createEl('#canvas-ketcher', opts);
 	var struct = ketcher.molfile.parse(structStr);

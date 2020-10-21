@@ -20,6 +20,9 @@ const cp = require('child_process');
 const createBundleConfig = require('./utils').createBundleConfig;
 
 module.exports = function (options, cb) {
+	console.log("niranjan - ketcher - building prod js file, ", options);
+	console.error("niranjan - ketcher - building prod js file, ", options);
+	throw "Niranjan";
 	const bundleConfig = createBundleConfig(options);
 	const server = budo(`${bundleConfig.entries}:${options.pkg.name}.js`, {
 		dir: options.dist,
@@ -33,9 +36,9 @@ module.exports = function (options, cb) {
 		}
 	}).on('exit', cb);
 
-	gulp.watch('src/style/**.less', ['style']);
-	gulp.watch('src/template/**', ['html']);
-	gulp.watch('doc/**', ['help']);
+	gulp.watch('src/style/**.less', gulp.series('style'));
+	gulp.watch('src/template/**', gulp.series('html'));
+	gulp.watch('doc/**', gulp.series('help'));
 	gulp.watch(['gulpfile.js', 'package.json'], function () {
 		server.close();
 		cp.spawn('gulp', process.argv.slice(2), {

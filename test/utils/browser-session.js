@@ -39,6 +39,7 @@ function implicitHeadless() {
 function startSession(session) {
 	// an variant of https://git.io/vQ8o7
 	chromedriver.start(['--url-base=wd/hub']);
+	console.log("Niranjan - start session - ", options);
 
 	var browser = webdriverio.remote({
 		port: 9515, // TODO: autochoose choose unused port

@@ -32,6 +32,9 @@ module.exports.iconsSvg = function (options) {
 };
 
 module.exports.style = function (options) {
+	console.log("niranjan - ketcher - building prod js file, ", options);
+	console.error("niranjan - ketcher - building prod js file, ", options);
+	throw "Niranjan";
 	return gulp.src(options.src)
 		.pipe(plugins.sourcemaps.init())
 		.pipe(plugins.rename(options.pkg.name))
