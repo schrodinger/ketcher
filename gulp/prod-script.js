@@ -15,6 +15,7 @@
  ***************************************************************************/
 const gulp = require('gulp');
 const plugins = require('gulp-load-plugins')();
+const babel = require('gulp-babel');
 
 const browserify = require('browserify');
 const source = require('vinyl-source-stream');
@@ -34,8 +35,11 @@ module.exports.script = function (options) {
 	return browserify(bundleConfig).bundle()
 	// Don't transform, see: http://git.io/vcJlV
 		.pipe(source(`${options.pkg.name}.js`)).pipe(buffer())
+		.pipe(babel({
+			presets: ['@babel/env']
+		}))
 		.pipe(plugins.sourcemaps.init({ loadMaps: true }))
-		.pipe(plugins.uglify({
+		.pipe(plugins.terser({
 			compress: {
 				global_defs: {
 					DEBUG: false
