@@ -20,9 +20,6 @@ const cp = require('child_process');
 const createBundleConfig = require('./utils').createBundleConfig;
 
 module.exports = function (options, cb) {
-	console.log("niranjan - ketcher - building prod js file, ", options);
-	console.error("niranjan - ketcher - building prod js file, ", options);
-	throw "Niranjan";
 	const bundleConfig = createBundleConfig(options);
 	const server = budo(`${bundleConfig.entries}:${options.pkg.name}.js`, {
 		dir: options.dist,

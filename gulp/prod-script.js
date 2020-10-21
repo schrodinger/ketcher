@@ -31,9 +31,6 @@ module.exports.script = function (options) {
 			global: true
 		}]
 	);
-	console.log("niranjan - ketcher - building prod js file, ", options);
-	console.error("niranjan - ketcher - building prod js file, ", options);
-	throw "Niranjan";
 	return browserify(bundleConfig).bundle()
 	// Don't transform, see: http://git.io/vcJlV
 		.pipe(source(`${options.pkg.name}.js`)).pipe(buffer())
