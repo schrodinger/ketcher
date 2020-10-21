@@ -78,6 +78,7 @@
   "scripts": {
     "build": "gulp build",
     "archive": "gulp archive",
+    "install": "gulp build",
     "start": "gulp serve",
     "test": "npm run test-io && npm run test-render",
     "test-io": "gulp test-io && node test io/io",
