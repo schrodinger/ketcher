@@ -84,7 +84,6 @@
     "generate-svg": "gulp test-render && node test/utils/generate-svg.js",
     "style": "gulp style",
     "gulp": "gulp",
-    "postinstall": "guppy pre-commit || exit 0",
     "prepare": "npm install --ignore-scripts --production=false && npm run build"
   },
   "dependencies": {
