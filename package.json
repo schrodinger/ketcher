@@ -2,16 +2,11 @@
   "name": "ketcher",
   "version": "2.0.0-RC",
   "description": "Web-based molecule sketcher",
-  "license": "Apache-2.0",
   "main": "dist/ketcher.js",
   "homepage": "http://lifescience.opensource.epam.com/ketcher",
   "author": {
     "name": "EPAM Life Sciences",
     "url": "http://lifescience.opensource.epam.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/schrodinger/ketcher.git"
   },
   "keywords": [
     "molecule",
